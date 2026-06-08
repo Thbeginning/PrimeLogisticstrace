@@ -831,9 +831,19 @@
   function setupRealtime(shipmentId) {
     realtimeChannel = db.channel(`track-ship-${shipmentId}`)
       .on('postgres_changes', { event:'UPDATE', schema:'public', table:'shipments', filter:`id=eq.${shipmentId}` }, async payload => {
+        const prevStatus = currentShipment?.status;
         currentShipment = { ...currentShipment, ...payload.new };
+        const newStatus = payload.new.status;
+
+        // If status changed away from 'In Transit', stop the map animation immediately
+        if (prevStatus === 'In Transit' && newStatus !== 'In Transit') {
+          if (_animId) { cancelAnimationFrame(_animId); _animId = null; }
+        }
+
         const { data: milestones } = await db.from('milestones').select('*').eq('shipment_id', shipmentId).order('timestamp',{ascending:false});
         renderDashboard(payload.new, milestones || []);
+        // Redraw map with new status (this will animate or pause correctly)
+        if (window._mapReady) drawMap(payload.new);
         showToast('🔄 Shipment updated in real-time!');
       })
       .subscribe();
@@ -1075,7 +1085,12 @@
 
     if (status === 'In Transit' && _transportMarker) {
       const remaining = coords.slice(idx);
-      if (remaining.length >= 2) startAnim(remaining, ttype);
+      if (remaining.length >= 2) {
+        // Calculate real total route distance for accurate speed pacing
+        let totalKm = 0;
+        for (let i = 0; i < coords.length - 1; i++) totalKm += haversineKmTrack(coords[i], coords[i+1]);
+        startAnim(remaining, ttype, totalKm);
+      }
     }
 
     const strip = document.getElementById('d-map-strip');
@@ -1103,29 +1118,64 @@
     }
   }
 
-  function startAnim(waypoints, type) {
+  // Haversine distance in km between two {lat,lng} points
+  function haversineKmTrack(a, b) {
+    const R = 6371;
+    const dLat = (b.lat - a.lat) * Math.PI / 180;
+    const dLng = (b.lng - a.lng) * Math.PI / 180;
+    const h = Math.sin(dLat/2)**2 + Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLng/2)**2;
+    return R * 2 * Math.asin(Math.sqrt(h));
+  }
+
+  function startAnim(waypoints, type, totalDistKm) {
     if (_animId) { cancelAnimationFrame(_animId); _animId = null; }
     if (!_transportMarker || waypoints.length < 2) return;
-    const SPEED = 0.035;
-    const segs = waypoints.slice(0,-1).map((_,i) => {
-      const a=waypoints[i], b=waypoints[i+1];
-      const dist = Math.sqrt(Math.pow(b.lat-a.lat,2)+Math.pow(b.lng-a.lng,2));
-      return Math.max(20000, Math.min(dist/SPEED*1000, 180000));
-    });
-    let seg=0, tStart=null;
+
+    // Realistic slow visual speed (seconds per km of real distance)
+    // Plane ~900 km/h, Ship ~35 km/h, Bus ~80 km/h, Train ~120 km/h
+    // Visual scale: 1 real hour = 30 visual seconds for air, adjusted for others
+    const secPerKm = { plane: 0.05, ship: 0.14, bus: 0.09, train: 0.07 }[type] || 0.05;
+
+    // Calculate actual km per segment using haversine
+    const segDistances = waypoints.slice(0,-1).map((_,i) => haversineKmTrack(waypoints[i], waypoints[i+1]));
+    const routeKm = segDistances.reduce((a,b) => a+b, 0);
+    const refKm   = totalDistKm || routeKm;
+
+    // Minimum 15s per segment, proportional to distance
+    const visualTotalMs = refKm * secPerKm * 1000;
+    const segs = segDistances.map(d => Math.max(15000, (d / Math.max(routeKm,1)) * visualTotalMs));
+
+    let seg = 0, tStart = null, coveredKm = 0;
+    const distEl = document.getElementById('d-distance');
+
     function tick(ts) {
       if (!_transportMarker || seg >= segs.length) return;
       if (!tStart) tStart = ts;
-      const rawT = Math.min((ts-tStart)/segs[seg], 1);
-      const eased = rawT<0.5 ? 2*rawT*rawT : 1-Math.pow(-2*rawT+2,2)/2;
-      const isLast = seg === segs.length-1;
-      const t = isLast ? eased*0.95 : eased;
-      const from=waypoints[seg], to=waypoints[seg+1];
-      const pos = new google.maps.LatLng(from.lat+(to.lat-from.lat)*t, from.lng+(to.lng-from.lng)*t);
+      const rawT  = Math.min((ts - tStart) / segs[seg], 1);
+      const eased = rawT < 0.5 ? 2*rawT*rawT : 1 - Math.pow(-2*rawT+2, 2)/2;
+      const isLast = seg === segs.length - 1;
+      const t = isLast ? eased * 0.95 : eased;
+
+      const from = waypoints[seg], to = waypoints[seg+1];
+      const pos  = new google.maps.LatLng(from.lat + (to.lat-from.lat)*t, from.lng + (to.lng-from.lng)*t);
       _transportMarker.setPosition(pos);
       if (_pulseOverlay) _pulseOverlay.moveTo(pos);
-      if (rawT < 1) { _animId = requestAnimationFrame(tick); }
-      else if (!isLast) { _transportMarker.setPosition(new google.maps.LatLng(to.lat,to.lng)); seg++; tStart=null; _animId=requestAnimationFrame(tick); }
+
+      // Live-update the distance-remaining counter
+      if (distEl) {
+        const segProgress = coveredKm + segDistances[seg] * rawT;
+        const remaining   = Math.max(0, Math.round(refKm - segProgress));
+        distEl.textContent = remaining.toLocaleString() + ' km';
+      }
+
+      if (rawT < 1) {
+        _animId = requestAnimationFrame(tick);
+      } else if (!isLast) {
+        coveredKm += segDistances[seg];
+        _transportMarker.setPosition(new google.maps.LatLng(to.lat, to.lng));
+        seg++; tStart = null;
+        _animId = requestAnimationFrame(tick);
+      }
     }
     _animId = requestAnimationFrame(tick);
   }

@@ -241,6 +241,12 @@ function mountDashboard() {
     searchEl.addEventListener('input', e => filterShipments(e.target.value));
   }
 
+  // Auto-calculate distance & ETA when origin / destination / transport type changes
+  ['cs-origin', 'cs-destination'].forEach(id => {
+    document.getElementById(id)?.addEventListener('blur', autoCalcDistanceETA);
+  });
+  document.getElementById('cs-transport')?.addEventListener('change', autoCalcDistanceETA);
+
   // -- Event delegation for shipment table buttons --
   // This is more reliable than inline onclick in file:// context
   function handleTableClick(e) {
@@ -1398,6 +1404,64 @@ function esc(str) {
 }
 
 function setEl(id, val) { const e = document.getElementById(id); if (e) e.textContent = val; }
+
+// -------------------------------------
+// AUTO-CALCULATE DISTANCE & ETA
+// -------------------------------------
+function haversineKmAdmin(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.asin(Math.sqrt(a));
+}
+
+async function autoCalcDistanceETA() {
+  const origin      = document.getElementById('cs-origin')?.value.trim();
+  const destination = document.getElementById('cs-destination')?.value.trim();
+  const transportType = document.getElementById('cs-transport')?.value || 'plane';
+  const distField   = document.getElementById('cs-distance');
+  const etaField    = document.getElementById('cs-eta');
+
+  if (!origin || !destination || origin.length < 3 || destination.length < 3) return;
+
+  // Show calculating state
+  if (distField) { distField.value = ''; distField.placeholder = '📍 Calculating...'; }
+  if (etaField)  { etaField.value  = ''; etaField.placeholder  = '⏱ Calculating...'; }
+
+  try {
+    const [oRes, dRes] = await Promise.all([
+      geocodePromise(null, origin),
+      geocodePromise(null, destination)
+    ]);
+
+    const oLat = oRes.geometry.location.lat();
+    const oLng = oRes.geometry.location.lng();
+    const dLat = dRes.geometry.location.lat();
+    const dLng = dRes.geometry.location.lng();
+
+    const distKm = Math.round(haversineKmAdmin(oLat, oLng, dLat, dLng));
+
+    // Realistic transport speeds (km/h)
+    const speeds = { plane: 900, ship: 35, bus: 80, train: 120 };
+    const speed  = speeds[transportType] || 900;
+    const hours  = distKm / speed;
+
+    let etaStr;
+    if (hours < 1)       etaStr = `${Math.round(hours * 60)} min`;
+    else if (hours < 48) etaStr = `${Math.round(hours)}h`;
+    else                 etaStr = `${Math.ceil(hours / 24)} days`;
+
+    if (distField) { distField.value = `${distKm.toLocaleString()} km`; distField.placeholder = 'e.g. 4065 km'; }
+    if (etaField)  { etaField.value  = etaStr;                           etaField.placeholder  = 'e.g. 63h or 4 days'; }
+
+    toast(`📐 Auto-calculated — Distance: ${distKm.toLocaleString()} km · ETA (${transportType}): ${etaStr}`);
+  } catch (err) {
+    if (distField) distField.placeholder = 'e.g. 4065 km';
+    if (etaField)  etaField.placeholder  = 'e.g. 63h or 4 days';
+    console.warn('Auto-calc distance/ETA failed:', err);
+  }
+}
 
 function log(msg) {
   // HTML uses id='update-log'
