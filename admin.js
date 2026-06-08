@@ -1099,7 +1099,10 @@ async function handleUpdateWithEmail(shipmentData, shouldNotify) {
     try {
       const res = await fetch(EDGE_FUNCTION_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        },
         body: JSON.stringify({
           tracking_number,
           status,
