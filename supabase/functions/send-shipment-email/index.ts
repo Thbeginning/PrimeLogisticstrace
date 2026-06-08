@@ -3,7 +3,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY") ?? "";
 const FROM_EMAIL    = Deno.env.get("FROM_EMAIL") ?? "info@sendflexlogisticssolution.com";
 const FROM_NAME     = Deno.env.get("FROM_NAME")  ?? "SendFlex Track";
-const WEB_URL       = Deno.env.get("WEB_URL") ?? "https://globalfreighttrace.com";
+const WEB_URL       = Deno.env.get("WEB_URL") ?? "https://sendflexlogisticssolution.com";
 
 // ── Status helpers ──────────────────────────────────────────────────────────
 function getStatusInfo(status: string): { color: string; icon: string; bgColor: string } {
@@ -66,7 +66,7 @@ function buildEmailHtml(p: {
           <tr>
             <td style="background:linear-gradient(135deg,#3b5bdb 0%,#5c4be8 100%);padding:28px 32px;text-align:center;">
               <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;letter-spacing:0.5px;">
-                GlobalFreight Trace
+                SendFlex Logistics
               </h1>
             </td>
           </tr>
@@ -144,7 +144,7 @@ function buildEmailHtml(p: {
           <!-- Contact Support button (shown only when there's a reason / issue) -->
           <tr>
             <td style="padding:0 40px 16px;text-align:center;">
-              <a href="mailto:support@globalfreighttrace.com"
+              <a href="mailto:info@sendflexlogisticssolution.com"
                  style="display:inline-block;background:#FF8C00;color:#ffffff;
                         text-decoration:none;padding:12px 32px;border-radius:8px;
                         font-size:14px;font-weight:700;letter-spacing:0.5px;">
@@ -171,7 +171,7 @@ function buildEmailHtml(p: {
                        border-top:1px solid #222222;">
               <p style="margin:0 0 5px;font-size:12px;color:#555555;">
                 Thank you for shipping with
-                <strong style="color:#777777;">GlobalFreight Trace</strong>.
+                <strong style="color:#777777;">SendFlex Logistics</strong>.
               </p>
               <p style="margin:0;font-size:12px;color:#444444;">
                 We are committed to delivering your package safely and on time.
@@ -258,6 +258,7 @@ Deno.serve(async (req: Request) => {
     body: JSON.stringify({
       sender:      { name: FROM_NAME, email: FROM_EMAIL },
       to:          [{ email: shipment.client_email }],
+      replyTo:     { email: "info@sendflexlogisticssolution.com" },
       subject,
       htmlContent: html,
     }),
