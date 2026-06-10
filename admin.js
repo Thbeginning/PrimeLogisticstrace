@@ -254,6 +254,7 @@ function mountDashboard() {
     if (!btn) return;
     const { action, id, num, status } = btn.dataset;
     if (action === 'status') openModal(id, num, status);
+    if (action === 'edit')   openEditModal(id);
     if (action === 'delete') delShipment(id, num);
   }
   document.getElementById('shipments-tbody-dashboard')?.addEventListener('click', handleTableClick);
@@ -370,6 +371,7 @@ async function loadShipments() {
   renderAllTable();
   updateStats();
   populateSelects();
+  checkArrivalAlerts(allShipments);
   return data;
 }
 
@@ -378,7 +380,7 @@ const loadAllShipments = loadShipments;
 
 function updateStats() {
   const t = allShipments.length;
-  const tr = allShipments.filter(s => ['In Transit','Customs Cleared','Out for Delivery'].includes(s.status)).length;
+  const tr = allShipments.filter(s => ['In Transit','Customs Hold','Customs Cleared','Out for Delivery'].includes(s.status)).length;
   const d = allShipments.filter(s => s.status === 'Delivered').length;
   setEl('stat-total', t); setEl('stat-transit', tr); setEl('stat-delivered', d);
 }
@@ -400,13 +402,17 @@ function renderDashTable() {
       <td>${s.weight ? s.weight + ' kg' : '�'}</td>
       <td><span class="status-chip ${chipCls(s.status)}">${esc(s.status)}</span></td>
       <td>
-        <div style="display:flex;gap:4px;">
+        <div style="display:flex;gap:4px;flex-wrap:wrap;">
           <button
             data-action="status"
             data-id="${s.id}"
             data-num="${esc(s.tracking_number)}"
             data-status="${esc(s.status)}"
             style="font-size:11px;color:#FF8C00;background:rgba(255,140,0,0.1);border:none;padding:4px 10px;border-radius:8px;cursor:pointer;font-weight:600;">Status</button>
+          <button
+            data-action="edit"
+            data-id="${s.id}"
+            style="font-size:11px;color:#60a5fa;background:rgba(59,130,246,0.1);border:none;padding:4px 10px;border-radius:8px;cursor:pointer;font-weight:600;">Edit</button>
           <a href="index.html?track=${esc(s.tracking_number)}" target="_blank" style="font-size:11px;color:rgba(255,255,255,0.5);background:rgba(255,255,255,0.05);padding:4px 10px;border-radius:8px;text-decoration:none;font-weight:600;">View</a>
         </div>
       </td>
@@ -430,13 +436,17 @@ function renderAllTable(list) {
       <td><span class="status-chip ${chipCls(s.status)}">${esc(s.status)}</span></td>
       <td style="color:rgba(255,255,255,0.5);font-size:12px;">${s.estimated_delivery ? new Date(s.estimated_delivery).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '�'}</td>
       <td>
-        <div style="display:flex;gap:4px;">
+        <div style="display:flex;gap:4px;flex-wrap:wrap;">
           <button
             data-action="status"
             data-id="${s.id}"
             data-num="${esc(s.tracking_number)}"
             data-status="${esc(s.status)}"
             style="font-size:11px;color:#FF8C00;background:rgba(255,140,0,0.1);border:none;padding:4px 10px;border-radius:8px;cursor:pointer;font-weight:600;">Status</button>
+          <button
+            data-action="edit"
+            data-id="${s.id}"
+            style="font-size:11px;color:#60a5fa;background:rgba(59,130,246,0.1);border:none;padding:4px 10px;border-radius:8px;cursor:pointer;font-weight:600;">Edit</button>
           <button
             data-action="delete"
             data-id="${s.id}"
@@ -1037,8 +1047,8 @@ async function updateLocation() {
 // STATUS BUTTONS
 // -------------------------------------
 function renderStatusBtns() {
-  const statuses = ['Order Placed','In Transit','Customs Cleared','Out for Delivery','Delivered'];
-  const icons = { 'Order Placed':'📋','In Transit':'✈️','Customs Cleared':'🛃','Out for Delivery':'🚚','Delivered':'✅' };
+  const statuses = ['Order Placed','In Transit','Customs Hold','Customs Cleared','Out for Delivery','Delivered'];
+  const icons = { 'Order Placed':'📋','In Transit':'✈️','Customs Hold':'🔒','Customs Cleared':'🛃','Out for Delivery':'🚚','Delivered':'✅' };
   const el = document.getElementById('status-buttons');
   if (!el) return;
   el.innerHTML = statuses.map(s => `
@@ -1398,8 +1408,145 @@ function chipCls(s) {
     'In Transit':      'blue',
     'Out for Delivery':'orange',
     'Customs Cleared': 'orange',
+    'Customs Hold':    'red',
     'On Hold':         'red',
   }[s] || 'gray';
+}
+
+// -------------------------------------
+// EDIT SHIPMENT MODAL
+// -------------------------------------
+function openEditModal(id) {
+  const s = allShipments.find(x => x.id === id);
+  if (!s) { toast('Shipment not found.', true); return; }
+
+  // Populate all fields
+  document.getElementById('edit-id').value                = s.id;
+  document.getElementById('edit-tracking').value          = s.tracking_number || '';
+  document.getElementById('edit-status').value            = s.status || 'Order Placed';
+  document.getElementById('edit-sender').value            = s.sender_name || '';
+  document.getElementById('edit-sender-phone').value      = s.sender_phone || '';
+  document.getElementById('edit-receiver').value          = s.receiver_name || '';
+  document.getElementById('edit-receiver-phone').value    = s.receiver_phone || '';
+  document.getElementById('edit-client-email').value      = s.client_email || '';
+  document.getElementById('edit-receiver-email').value    = s.receiver_email || '';
+  document.getElementById('edit-origin').value            = s.origin || '';
+  document.getElementById('edit-destination').value       = s.destination || '';
+  document.getElementById('edit-weight').value            = s.weight || '';
+  document.getElementById('edit-description').value       = s.description || '';
+  document.getElementById('edit-transport').value         = s.transport_type || 'plane';
+  document.getElementById('edit-shipped-date').value      = s.shipped_date || '';
+  document.getElementById('edit-delivery').value          = s.estimated_delivery || '';
+  document.getElementById('edit-distance').value          = s.distance || '';
+  document.getElementById('edit-eta').value               = s.eta || '';
+  document.getElementById('edit-package-type').value      = s.package_type || '';
+  document.getElementById('edit-service-type').value      = s.service_type || '';
+  document.getElementById('edit-quantity').value          = s.quantity || '';
+  document.getElementById('edit-dimensions').value        = s.dimensions || '';
+  document.getElementById('edit-declared-value').value    = s.declared_value || '';
+  document.getElementById('edit-shipping-cost').value     = s.shipping_cost || '';
+  document.getElementById('edit-origin-city').value       = s.origin_city || '';
+  document.getElementById('edit-origin-country').value    = s.origin_country || '';
+  document.getElementById('edit-destination-city').value  = s.destination_city || '';
+  document.getElementById('edit-destination-country').value = s.destination_country || '';
+
+  document.getElementById('edit-error').classList.add('hidden');
+  document.getElementById('edit-success').classList.add('hidden');
+  document.getElementById('edit-modal').classList.remove('hidden');
+}
+
+function closeEditModal() {
+  document.getElementById('edit-modal').classList.add('hidden');
+}
+
+async function saveEditShipment() {
+  const id = document.getElementById('edit-id').value;
+  if (!id) { toast('No shipment ID found.', true); return; }
+
+  const btn = document.getElementById('edit-save-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  const payload = {
+    tracking_number:      document.getElementById('edit-tracking').value.trim(),
+    status:               document.getElementById('edit-status').value,
+    sender_name:          document.getElementById('edit-sender').value.trim(),
+    sender_phone:         document.getElementById('edit-sender-phone').value.trim(),
+    receiver_name:        document.getElementById('edit-receiver').value.trim(),
+    receiver_phone:       document.getElementById('edit-receiver-phone').value.trim(),
+    client_email:         document.getElementById('edit-client-email').value.trim(),
+    receiver_email:       document.getElementById('edit-receiver-email').value.trim(),
+    origin:               document.getElementById('edit-origin').value.trim(),
+    destination:          document.getElementById('edit-destination').value.trim(),
+    weight:               parseFloat(document.getElementById('edit-weight').value) || null,
+    description:          document.getElementById('edit-description').value.trim(),
+    transport_type:       document.getElementById('edit-transport').value,
+    shipped_date:         document.getElementById('edit-shipped-date').value || null,
+    estimated_delivery:   document.getElementById('edit-delivery').value || null,
+    distance:             document.getElementById('edit-distance').value.trim(),
+    eta:                  document.getElementById('edit-eta').value.trim(),
+    package_type:         document.getElementById('edit-package-type').value.trim(),
+    service_type:         document.getElementById('edit-service-type').value.trim(),
+    quantity:             parseInt(document.getElementById('edit-quantity').value) || null,
+    dimensions:           document.getElementById('edit-dimensions').value.trim(),
+    declared_value:       document.getElementById('edit-declared-value').value.trim(),
+    shipping_cost:        document.getElementById('edit-shipping-cost').value.trim(),
+    origin_city:          document.getElementById('edit-origin-city').value.trim(),
+    origin_country:       document.getElementById('edit-origin-country').value.trim(),
+    destination_city:     document.getElementById('edit-destination-city').value.trim(),
+    destination_country:  document.getElementById('edit-destination-country').value.trim(),
+    updated_at:           new Date().toISOString(),
+  };
+
+  const { error } = await db.from('shipments').update(payload).eq('id', id);
+
+  btn.disabled = false;
+  btn.textContent = 'Save Changes';
+
+  if (error) {
+    document.getElementById('edit-error').textContent = '❌ ' + error.message;
+    document.getElementById('edit-error').classList.remove('hidden');
+  } else {
+    document.getElementById('edit-success').textContent = '✅ Shipment updated successfully!';
+    document.getElementById('edit-success').classList.remove('hidden');
+    toast('✅ Shipment updated successfully!');
+    log(`✏️ Shipment ${payload.tracking_number} edited`);
+    loadShipments();
+    setTimeout(() => closeEditModal(), 1500);
+  }
+}
+
+// -------------------------------------
+// ADMIN ARRIVAL ALERT (In Transit → Customs Hold)
+// -------------------------------------
+const _alertedArrivals = new Set();
+
+function checkArrivalAlerts(shipments) {
+  const banner = document.getElementById('arrival-alert-banner');
+  const list   = document.getElementById('arrival-alert-list');
+  if (!banner || !list) return;
+
+  const arrived = shipments.filter(s => s.status === 'In Transit' && s._arrived_at_dest);
+  // Fallback: flag any In Transit shipments where progress >= 98%
+  // (we check via the routeState if available, but also just show all In Transit as a reminder)
+  const inTransit = shipments.filter(s => s.status === 'In Transit');
+  if (!inTransit.length) { banner.classList.add('hidden'); return; }
+
+  let hasNew = false;
+  const items = inTransit.map(s => {
+    const isNew = !_alertedArrivals.has(s.id);
+    if (isNew) { _alertedArrivals.add(s.id); hasNew = true; }
+    return `<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+      <div>
+        <span style="color:#fbbf24;font-weight:700;font-size:13px;">${esc(s.tracking_number)}</span>
+        <span style="color:rgba(255,255,255,0.5);font-size:12px;margin-left:8px;">${esc(s.origin||'?')} → ${esc(s.destination||'?')}</span>
+      </div>
+      <button onclick="openModal('${s.id}','${esc(s.tracking_number)}','In Transit')" style="font-size:11px;background:#7c3aed;color:#fff;border:none;padding:4px 12px;border-radius:8px;cursor:pointer;font-weight:600;white-space:nowrap;">Update Status</button>
+    </div>`;
+  }).join('');
+
+  list.innerHTML = items;
+  banner.classList.remove('hidden');
 }
 
 function esc(str) {

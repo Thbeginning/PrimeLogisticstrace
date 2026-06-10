@@ -10,6 +10,7 @@ function getStatusInfo(status: string): { color: string; icon: string; bgColor: 
   switch (status) {
     case "Order Placed":      return { color: "#6366f1", bgColor: "#6366f1", icon: "📋" };
     case "In Transit":        return { color: "#f59e0b", bgColor: "#f59e0b", icon: "✈️" };
+    case "Customs Hold":      return { color: "#ef4444", bgColor: "#ef4444", icon: "🔒" };
     case "Customs Cleared":   return { color: "#10b981", bgColor: "#10b981", icon: "🛃" };
     case "Out for Delivery":  return { color: "#3b82f6", bgColor: "#3b82f6", icon: "🚚" };
     case "Delivered":         return { color: "#22c55e", bgColor: "#22c55e", icon: "✅" };

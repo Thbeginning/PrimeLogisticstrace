@@ -887,6 +887,7 @@ const UIController = (() => {
   const STATUS_STEPS = [
     { key: 'Order Placed', icon: '📋', label: 'Order Confirmed', sub: 'Shipment created & payment received' },
     { key: 'In Transit', icon: '✈️', label: 'In Transit', sub: 'Cargo en route to destination' },
+    { key: 'Customs Hold', icon: '🔒', label: 'Customs Hold', sub: 'Package held at customs — awaiting clearance' },
     { key: 'Customs Cleared', icon: '🛃', label: 'Customs Cleared', sub: 'Passed customs inspection' },
     { key: 'Out for Delivery', icon: '🚚', label: 'Out for Delivery', sub: 'With local delivery courier' },
     { key: 'Delivered', icon: '✅', label: 'Delivered', sub: 'Package received by recipient' },
@@ -927,7 +928,7 @@ const UIController = (() => {
       statusBadgeCard.textContent = shipment.status || 'Unknown';
       const cls = {
         'Delivered': 'bg-green-600', 'In Transit': 'bg-blue-600',
-        'Out for Delivery': 'bg-orange-500', 'Customs Cleared': 'bg-teal-600',
+        'Out for Delivery': 'bg-orange-500', 'Customs Cleared': 'bg-teal-600', 'Customs Hold': 'bg-red-600',
         'On Hold': 'bg-red-500', 'Order Placed': 'bg-gray-600',
       }[shipment.status] || 'bg-gray-600';
       statusBadgeCard.className = `text-white text-xs font-bold px-4 py-2 rounded-full uppercase tracking-wide flex-shrink-0 ${cls}`;

@@ -630,7 +630,7 @@
 
     const badge = $('d-status-badge');
     badge.textContent = s.status || 'Unknown';
-    const cls = { 'Delivered':'badge-delivered','In Transit':'badge-transit','Out for Delivery':'badge-out','Customs Cleared':'badge-customs','On Hold':'badge-hold','Order Placed':'badge-placed' }[s.status] || 'badge-placed';
+    const cls = { 'Delivered':'badge-delivered','In Transit':'badge-transit','Out for Delivery':'badge-out','Customs Cleared':'badge-customs','Customs Hold':'badge-hold','On Hold':'badge-hold','Order Placed':'badge-placed' }[s.status] || 'badge-placed';
     badge.className = cls;
 
     // Barcode
@@ -687,7 +687,8 @@
         'In Transit': 'background:#dbeafe;color:#1e40af;',
         'On Hold': 'background:#ffedd5;color:#9a3412;',
         'Out for Delivery': 'background:#fef08a;color:#854d0e;',
-        'Customs Cleared': 'background:#e0e7ff;color:#3730a3;'
+        'Customs Cleared': 'background:#e0e7ff;color:#3730a3;',
+        'Customs Hold':    'background:#fee2e2;color:#991b1b;'
       }[s.status] || 'background:#f1f5f9;color:#475569;';
       pill.style.cssText = pCls + 'font-size:11px;font-weight:600;padding:2px 8px;border-radius:12px;';
     }
@@ -763,6 +764,7 @@
   const STATUS_STEPS = [
     { key:'Order Placed',    icon:'📋', label:'Order Confirmed',    sub:'Shipment created & payment received' },
     { key:'In Transit',      icon:'✈️', label:'In Transit',         sub:'Cargo en route to destination' },
+    { key:'Customs Hold',    icon:'🔒', label:'Customs Hold',        sub:'Package held at customs — awaiting clearance' },
     { key:'Customs Cleared', icon:'🛃', label:'Customs Cleared',    sub:'Passed customs inspection' },
     { key:'Out for Delivery',icon:'🚚', label:'Out for Delivery',   sub:'With local delivery courier' },
     { key:'Delivered',       icon:'✅', label:'Delivered',           sub:'Package received by recipient' },

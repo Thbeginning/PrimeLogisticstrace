@@ -203,6 +203,21 @@
         </div>
       </div>
 
+      <!-- Arrival Alert Banner -->
+      <div id="arrival-alert-banner" class="hidden mb-6 rounded-2xl border p-4" style="background:rgba(124,58,237,0.1);border-color:rgba(124,58,237,0.3);">
+        <div class="flex items-center gap-3 mb-3">
+          <span style="font-size:20px;">🔔</span>
+          <div>
+            <p class="text-white font-semibold text-sm">Shipments Currently In Transit</p>
+            <p class="text-white/50 text-xs mt-0.5">Once a shipment reaches customs, update its status to <strong class="text-purple-400">Customs Hold</strong></p>
+          </div>
+          <button onclick="document.getElementById('arrival-alert-banner').classList.add('hidden')" class="ml-auto text-white/30 hover:text-white transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div id="arrival-alert-list"></div>
+      </div>
+
       <!-- ── DASHBOARD PANEL ── -->
       <div id="panel-dashboard" class="admin-panel active">
         <!-- Stats -->
@@ -303,6 +318,7 @@
                   <select id="cs-status" class="admin-input w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 transition-all">
                     <option value="Order Placed">Order Placed</option>
                     <option value="In Transit">In Transit</option>
+                    <option value="Customs Hold">🔒 Customs Hold</option>
                     <option value="On Hold">On Hold</option>
                     <option value="Customs Cleared">Customs Cleared</option>
                     <option value="Out for Delivery">Out for Delivery</option>
@@ -639,6 +655,7 @@
           <option value="Order Placed">Order Placed</option>
           <option value="In Transit">In Transit</option>
           <option value="On Hold">On Hold</option>
+          <option value="Customs Hold">🔒 Customs Hold</option>
           <option value="Customs Cleared">Customs Cleared</option>
           <option value="Out for Delivery">Out for Delivery</option>
           <option value="Delivered">Delivered</option>
@@ -702,6 +719,190 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="admin.js"></script>
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBzf6w-rn68amA_RXuVcSlQ1xBtoB3-iuM&callback=initAdminMap"></script>
+
+  <!-- ── EDIT SHIPMENT MODAL ── -->
+  <div id="edit-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-navy-700 border border-white/10 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" style="background:#050A30;">
+      <div class="sticky top-0 flex items-center justify-between px-6 py-4 border-b border-white/10" style="background:#050A30;z-index:1;">
+        <div>
+          <h3 class="font-semibold text-white text-base">✏️ Edit Shipment</h3>
+          <p class="text-white/40 text-xs mt-0.5">Changes save to the live database immediately</p>
+        </div>
+        <button onclick="closeEditModal()" class="text-white/30 hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <input type="hidden" id="edit-id" />
+
+        <!-- Status & Tracking -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Tracking Number</label>
+            <input id="edit-tracking" type="text" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Status</label>
+            <select id="edit-status" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500">
+              <option value="Order Placed">Order Placed</option>
+              <option value="In Transit">In Transit</option>
+              <option value="Customs Hold">🔒 Customs Hold</option>
+              <option value="On Hold">On Hold</option>
+              <option value="Customs Cleared">Customs Cleared</option>
+              <option value="Out for Delivery">Out for Delivery</option>
+              <option value="Delivered">Delivered</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Sender & Receiver -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Sender Name</label>
+            <input id="edit-sender" type="text" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Sender Phone</label>
+            <input id="edit-sender-phone" type="tel" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Receiver Name</label>
+            <input id="edit-receiver" type="text" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Receiver Phone</label>
+            <input id="edit-receiver-phone" type="tel" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Client Email <span class="text-orange-400/60 normal-case">(notifications)</span></label>
+            <input id="edit-client-email" type="email" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Receiver Email <span class="text-orange-400/60 normal-case">(shown on tracking)</span></label>
+            <input id="edit-receiver-email" type="email" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+        </div>
+
+        <!-- Route -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Origin</label>
+            <input id="edit-origin" type="text" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Destination</label>
+            <input id="edit-destination" type="text" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Origin City</label>
+            <input id="edit-origin-city" type="text" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Origin Country</label>
+            <input id="edit-origin-country" type="text" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Destination City</label>
+            <input id="edit-destination-city" type="text" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Destination Country</label>
+            <input id="edit-destination-country" type="text" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+        </div>
+
+        <!-- Package Details -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Weight (kg)</label>
+            <input id="edit-weight" type="number" step="any" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Quantity</label>
+            <input id="edit-quantity" type="number" min="1" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Dimensions (cm)</label>
+            <input id="edit-dimensions" type="text" placeholder="40x40x40" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Description / Contents</label>
+            <input id="edit-description" type="text" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Package Type</label>
+            <input id="edit-package-type" type="text" placeholder="Box, Pallet..." class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+        </div>
+
+        <!-- Shipping Info -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Transport Type</label>
+            <select id="edit-transport" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500">
+              <option value="plane">✈️ Air Freight</option>
+              <option value="ship">🚢 Sea Freight</option>
+              <option value="bus">🚌 Road Freight</option>
+              <option value="train">🚂 Rail Freight</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Service Type</label>
+            <input id="edit-service-type" type="text" placeholder="Express, Standard..." class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Shipped Date</label>
+            <input id="edit-shipped-date" type="date" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Est. Delivery Date</label>
+            <input id="edit-delivery" type="date" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Distance</label>
+            <input id="edit-distance" type="text" placeholder="e.g. 4065 km" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">ETA Display</label>
+            <input id="edit-eta" type="text" placeholder="e.g. 3 days" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Declared Value</label>
+            <input id="edit-declared-value" type="text" placeholder="e.g. $500.00" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Shipping Cost</label>
+            <input id="edit-shipping-cost" type="text" placeholder="e.g. $40.00" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
+          </div>
+        </div>
+
+        <div id="edit-error" class="hidden bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl px-4 py-3 text-sm"></div>
+        <div id="edit-success" class="hidden bg-green-500/10 border border-green-500/20 text-green-400 rounded-xl px-4 py-3 text-sm"></div>
+
+        <div class="flex gap-3 pt-2">
+          <button id="edit-save-btn" onclick="saveEditShipment()" class="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 rounded-xl transition-all">Save Changes</button>
+          <button onclick="closeEditModal()" class="flex-1 bg-white/10 hover:bg-white/20 text-white font-bold py-3.5 rounded-xl transition-all">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <script>
     // Responsive sidebar toggle
     function toggleSidebar() {
