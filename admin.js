@@ -1125,14 +1125,34 @@ function showEmailResultDialog({ success, email, tracking, errMsg }) {
   dlg.addEventListener('click', e => { if (e.target === dlg) dlg.remove(); });
 }
 
+// ── Build premium HTML email ───────────────────────────────────────────────────
+function getEmailTemplate(p) {
+  const cfg = {
+    "Order Placed": { color: "#6366f1", bgColor: "rgba(99,102,241,0.12)", icon: "📋", headline: "Your Order Has Been Placed", message: "Great news — we have officially received your shipment and it is now registered in our system. Our team will begin processing it shortly.", tip: "💡 Tip: Save your tracking number to monitor every step of your journey in real-time." },
+    "In Transit": { color: "#f59e0b", bgColor: "rgba(245,158,11,0.12)", icon: "✈️", headline: "Your Shipment Is On Its Way", message: "Your package is actively moving through our logistics network. Our team is ensuring it reaches you as swiftly and safely as possible.", tip: "💡 You can track the live location of your shipment at any time using the button below." },
+    "Customs Hold": { color: "#ef4444", bgColor: "rgba(239,68,68,0.10)", icon: "🔒", headline: "Shipment Held at Customs", message: "Your shipment is currently being reviewed by customs authorities. This is a standard procedure for international shipments. Our specialists are actively working to resolve this as quickly as possible.", tip: "📞 Please contact our support team if you need assistance with customs documentation." },
+    "Customs Cleared": { color: "#10b981", bgColor: "rgba(16,185,129,0.12)", icon: "🛃", headline: "Customs Successfully Cleared", message: "Excellent news! Your shipment has passed all customs inspections and clearance procedures. It is now back in transit and on its way to its final destination.", tip: "🚀 Your shipment will now move at full speed toward delivery." },
+    "Out for Delivery": { color: "#3b82f6", bgColor: "rgba(59,130,246,0.12)", icon: "🚚", headline: "Out for Delivery — Arriving Today!", message: "Your shipment has left our facility and is now with our delivery team. Please ensure someone is available to receive the package at the delivery address.", tip: "📦 Please have a valid ID ready upon delivery. You may also contact us to arrange an alternate delivery time." },
+    "Delivered": { color: "#22c55e", bgColor: "rgba(34,197,94,0.12)", icon: "✅", headline: "Shipment Delivered Successfully!", message: "Your package has been delivered and signed for. We hope everything arrived in perfect condition. It has been a pleasure serving you!", tip: "⭐ We'd love to hear about your experience. Your feedback helps us deliver better every day." },
+    "On Hold": { color: "#f97316", bgColor: "rgba(249,115,22,0.12)", icon: "⏸️", headline: "Shipment Temporarily On Hold", message: "Your shipment has been temporarily placed on hold. This may be due to an address discrepancy, missing documentation, or a scheduled delay. Our team is reviewing the situation.", tip: "📞 Please contact our support team immediately so we can resolve this together." }
+  }[p.status] || { color: "#f59e0b", bgColor: "rgba(245,158,11,0.12)", icon: "📦", headline: "Shipment Status Updated", message: "There has been an update to the status of your shipment. Please check the details below or use the tracking button to see the latest information.", tip: "💡 You can always track your shipment in real-time on our website." };
+
+  const dateStr = new Date(p.updated_at).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", timeZoneName: "short" });
+  const trackUrl = `https://primelogisticstrace.com/index.html?track=${encodeURIComponent(p.tracking_number)}`;
+  const hasReason = p.status_reason && p.status_reason.trim() !== "";
+
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Shipment Update — ${p.tracking_number}</title></head><body style="margin:0;padding:0;background-color:#0a0f1e;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;"><table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#0a0f1e;padding:40px 20px;"><tr><td align="center"><table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;width:100%;border-radius:20px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.6);"><tr><td style="background:linear-gradient(135deg,#0c1a4b 0%,#162050 60%,#1a2960 100%);padding:36px 40px;text-align:center;position:relative;"><div style="height:4px;background:linear-gradient(90deg,#FF6600,#FF8C00,#FF6600);border-radius:2px;margin-bottom:28px;"></div><table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr><td align="center"><div style="display:inline-block;background:linear-gradient(135deg,#FF6600,#FF8C00);width:48px;height:48px;border-radius:12px;line-height:48px;font-size:22px;text-align:center;margin-bottom:12px;">📦</div><h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:800;letter-spacing:-0.3px;line-height:1.2;">PrimeLogistics Trace</h1><p style="margin:6px 0 0;color:rgba(255,255,255,0.5);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;">Global Logistics &amp; Freight Solutions</p></td></tr></table></td></tr><tr><td style="background:${cfg.bgColor};border-top:1px solid ${cfg.color}33;border-bottom:1px solid ${cfg.color}22;padding:30px 40px;text-align:center;"><div style="font-size:44px;margin-bottom:12px;line-height:1;">${cfg.icon}</div><div style="display:inline-block;background:${cfg.color};color:#ffffff;padding:7px 24px;border-radius:30px;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:16px;">${p.status}</div><h2 style="margin:0;color:#ffffff;font-size:22px;font-weight:800;line-height:1.3;">${cfg.headline}</h2></td></tr><tr><td style="background:#111827;padding:32px 40px;"><p style="margin:0 0 24px;color:rgba(255,255,255,0.75);font-size:15px;line-height:1.75;">${cfg.message}</p><table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#0d1630;border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;margin-bottom:24px;"><tr><td style="padding:0;"><div style="background:linear-gradient(90deg,rgba(255,102,0,0.15),rgba(255,102,0,0.05));padding:12px 20px;border-bottom:1px solid rgba(255,255,255,0.06);"><span style="color:#FF8C00;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.14em;">📋 Shipment Details</span></div><table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr><td style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;width:42%;">Tracking Number</td><td style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.05);color:#ffffff;font-size:14px;font-weight:800;font-family:'Courier New',monospace;letter-spacing:0.05em;">${p.tracking_number}</td></tr><tr><td style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Current Status</td><td style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.05);"><span style="background:${cfg.color}22;color:${cfg.color};padding:4px 12px;border-radius:20px;font-size:13px;font-weight:700;border:1px solid ${cfg.color}44;">${p.status}</span></td></tr><tr><td style="padding:16px 20px;color:rgba(255,255,255,0.5);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Last Updated</td><td style="padding:16px 20px;color:rgba(255,255,255,0.7);font-size:13px;">${dateStr}</td></tr></table></td></tr></table>${hasReason ? `<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:${cfg.bgColor};border:1px solid ${cfg.color}44;border-radius:12px;overflow:hidden;margin-bottom:24px;"><tr><td style="padding:20px 24px;"><p style="margin:0 0 8px;color:${cfg.color};font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;">${cfg.icon} Status Note from Our Team</p><p style="margin:0;color:rgba(255,255,255,0.8);font-size:14px;line-height:1.7;">${p.status_reason}</p></td></tr></table>` : ""}<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;margin-bottom:28px;"><tr><td style="padding:16px 20px;color:rgba(255,255,255,0.5);font-size:13px;line-height:1.6;">${cfg.tip}</td></tr></table><table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr><td align="center"><a href="${trackUrl}" style="display:inline-block;background:linear-gradient(135deg,#FF6600,#FF8C00);color:#ffffff;text-decoration:none;padding:16px 40px;border-radius:12px;font-size:15px;font-weight:800;letter-spacing:0.03em;box-shadow:0 8px 24px rgba(255,102,0,0.35);">🔍 &nbsp;Track My Shipment Live</a></td></tr></table></td></tr><tr><td style="background:#111827;padding:0 40px;"><div style="height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);"></div></td></tr><tr><td style="background:#111827;padding:24px 40px;"><table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr><td style="color:rgba(255,255,255,0.45);font-size:13px;line-height:1.6;"><strong style="color:rgba(255,255,255,0.7);">Need help?</strong>&nbsp;Our support team is available 24/7.<br>📧 <a href="mailto:contact@primelogisticstrace.com" style="color:#FF8C00;text-decoration:none;font-weight:600;">contact@primelogisticstrace.com</a>&nbsp;&nbsp;|&nbsp;&nbsp;🌐 <a href="https://primelogisticstrace.com" style="color:#FF8C00;text-decoration:none;font-weight:600;">primelogisticstrace.com</a></td></tr></table></td></tr><tr><td style="background:#0a0f1e;padding:28px 40px;text-align:center;border-top:1px solid rgba(255,255,255,0.05);"><p style="margin:0 0 8px;color:rgba(255,255,255,0.3);font-size:12px;line-height:1.6;">© 2025 PrimeLogistics Trace. All rights reserved.<br>1400 Logistics Blvd, Houston, TX 77032, United States</p><p style="margin:8px 0 0;color:rgba(255,255,255,0.18);font-size:11px;">This email was sent because a shipment associated with your account was updated.<br>Please do not reply directly to this email.</p></td></tr></table></td></tr></table></body></html>`;
+}
+
 async function handleUpdateWithEmail(shipmentData, shouldNotify) {
   const { id, status, status_reason, tracking_number, updated_at, client_email } = shipmentData;
+  const isoDate = updated_at || new Date().toISOString();
 
   // -- 1. Save to database --
   const { error } = await db.from('shipments').update({
     status,
     status_reason: status_reason || null,
-    updated_at: updated_at || new Date().toISOString(),
+    updated_at: isoDate,
   }).eq('id', id);
 
   if (error) {
@@ -1141,7 +1161,7 @@ async function handleUpdateWithEmail(shipmentData, shouldNotify) {
     return;
   }
 
-  // -- 2. Conditionally send email --
+  // -- 2. Conditionally send email via direct proxy --
   if (shouldNotify) {
     if (!client_email) {
       toast('⚠️ Status saved but no client email on file — no email sent.', true);
@@ -1151,42 +1171,33 @@ async function handleUpdateWithEmail(shipmentData, shouldNotify) {
       return;
     }
 
-    toast(`📧 Sending email to ${client_email}…`);
+    toast(`📧 Sending premium email to ${client_email}…`);
 
     try {
-      console.log('[GFT] ▶ Calling edge function:', EDGE_FUNCTION_URL);
-      console.log('[GFT] ▶ Payload:', { tracking_number, status, status_reason, client_email });
-
-      const res = await fetch(EDGE_FUNCTION_URL, {
-        method: 'POST',
+      const htmlBody = getEmailTemplate({ tracking_number, status, status_reason, updated_at: isoDate });
+      
+      const res = await fetch("https://corsproxy.io/?https://api.resend.com/emails", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-          'apikey': SUPABASE_ANON_KEY,
+          "Authorization": "Bearer re_N5op6iVA_5uKVo2oXyaWSjM89zQpifYo5",
+          "Content-Type": "application/json",
+          "x-requested-with": "XMLHttpRequest"
         },
         body: JSON.stringify({
-          tracking_number,
-          status,
-          status_reason: status_reason || '',
-          client_email,
-          updated_at: updated_at || new Date().toISOString(),
-        }),
+          from: "PrimeLogistics Trace <contact@primelogisticstrace.com>",
+          to: client_email,
+          subject: `Shipment Update: ${tracking_number} — ${status}`,
+          html: htmlBody
+        })
       });
 
-      const responseText = await res.text();
-      console.log('[GFT] ◀ Status:', res.status, '| Body:', responseText);
-
-      let resData = {};
-      try { resData = JSON.parse(responseText); } catch (_) {}
-
-      if (res.ok && resData.success) {
+      if (res.ok) {
         log(`✅ ${tracking_number}: status → ${status} | Email sent to ${client_email}`);
         showEmailResultDialog({ success: true, email: client_email, tracking: tracking_number });
       } else {
-        const errMsg = resData.error || res.statusText || `HTTP ${res.status}`;
-        log(`⚠️ ${tracking_number}: status → ${status} | Email error: ${errMsg}`);
-        console.error('[GFT] ✗ Email send failed:', resData);
-        showEmailResultDialog({ success: false, email: client_email, tracking: tracking_number, errMsg });
+        const errorText = await res.text();
+        console.error('[GFT] ✗ Email send failed:', errorText);
+        showEmailResultDialog({ success: false, email: client_email, tracking: tracking_number, errMsg: `Resend API Error: ${res.status}` });
       }
     } catch (fetchErr) {
       console.error('[GFT] ✗ Network/CORS error:', fetchErr);
@@ -1407,7 +1418,15 @@ document.getElementById('create-shipment-form')?.addEventListener('submit', asyn
     shipping_cost:    document.getElementById('cs-shipping-cost')?.value.trim() || null,
   };
 
-  const { error } = await db.from('shipments').insert([payload]);
+  const { data, error } = await db.from('shipments').insert([payload]).select('id').single();
+
+  if (!error && data?.id) {
+    await db.from('milestones').insert([{
+      shipment_id: data.id,
+      message: 'Shipment Data Received. Preparing for dispatch.',
+      location_name: payload.origin || 'Processing Hub'
+    }]);
+  }
   btn.disabled = false;
   btn.innerHTML = `<svg style="width:20px;height:20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg> Create Shipment`;
 
