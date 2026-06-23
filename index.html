@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
@@ -1939,107 +1939,203 @@
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════
-       GLOBAL NETWORK (WOW FACTOR)
-  ════════════════════════════════════════ -->
-  <section id="global-network" style="background:var(--navy); padding:100px 0; position:relative; overflow:hidden;">
-    <div style="position:absolute; inset:0; opacity:0.03; background-image: linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px); background-size: 40px 40px;"></div>
-    
-    <div class="container" style="position:relative; z-index:2; display:flex; flex-direction:column; align-items:center;">
-      <div style="text-align:center; max-width:700px; margin-bottom:60px;" class="reveal">
-        <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.2); padding:6px 14px; border-radius:30px; margin-bottom:20px;">
-          <div style="width:8px; height:8px; background:#22c55e; border-radius:50%; box-shadow:0 0 10px #22c55e; animation:ping 2s infinite;"></div>
-          <span style="color:#4ade80; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em;">Live Operations Dashboard</span>
+  <!-- GLOBAL NETWORK - 3D ROTATING GLOBE -->
+  <section id="global-network" style="background:var(--navy);padding:100px 0;position:relative;overflow:hidden;">
+    <div style="position:absolute;inset:0;opacity:0.03;background-image:linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px);background-size:40px 40px;"></div>
+    <div class="container" style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;">
+      <div style="text-align:center;max-width:700px;margin-bottom:60px;" class="reveal">
+        <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);padding:6px 14px;border-radius:30px;margin-bottom:20px;">
+          <div style="width:8px;height:8px;background:#22c55e;border-radius:50%;box-shadow:0 0 10px #22c55e;animation:ping 2s infinite;"></div>
+          <span style="color:#4ade80;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Live Operations Dashboard</span>
         </div>
-        <h2 style="color:white; font-family:var(--font-head); font-size:clamp(2rem, 5vw, 3rem); font-weight:900; line-height:1.1; margin-bottom:20px;">Global Network <span style="color:var(--orange);">In Motion</span></h2>
-        <p style="color:rgba(255,255,255,0.6); font-size:1.1rem;">Watch our active shipments moving across 192+ countries in real-time. Over 2,400 active flights and sea freight routes managed daily.</p>
+        <h2 style="color:white;font-family:var(--font-head);font-size:clamp(2rem,5vw,3rem);font-weight:900;line-height:1.1;margin-bottom:20px;">Global Network <span style="color:var(--orange);">In Motion</span></h2>
+        <p style="color:rgba(255,255,255,0.6);font-size:1.1rem;">Watch our active shipments moving across 192+ countries in real-time. Over 2,400 active flights and sea freight routes managed daily.</p>
       </div>
-
-      <div style="position:relative; width:100%; max-width:1000px; height:450px; background:radial-gradient(circle at center, rgba(37,99,235,0.1) 0%, transparent 70%); border-radius:30px; border:1px solid rgba(255,255,255,0.05);" class="reveal">
-        
-        <svg viewBox="0 0 1000 450" style="width:100%; height:100%; opacity:0.15; position:absolute; top:0; left:0; pointer-events:none;">
-          <path d="M 100 150 Q 200 100 300 150 T 450 180 M 500 100 Q 600 50 700 150 T 900 180 M 350 250 Q 400 350 300 400 M 600 200 Q 650 300 750 350 M 150 250 Q 250 300 200 400" fill="none" stroke="white" stroke-width="2" stroke-dasharray="4 4" stroke-linecap="round"/>
-        </svg>
-
-        <div class="map-nodes" style="position:absolute; inset:0;">
-          <div class="map-hub" style="top:25%; left:22%;">
-            <div class="hub-pulse"></div><div class="hub-dot"></div><span class="hub-label">New York</span>
+      <div style="position:relative;width:100%;max-width:960px;" class="reveal">
+        <canvas id="globe-canvas" style="width:100%;height:auto;display:block;border-radius:16px;"></canvas>
+        <div style="position:absolute;bottom:24px;right:24px;background:rgba(4,12,40,0.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.12);padding:18px 28px;border-radius:18px;display:flex;gap:24px;box-shadow:0 12px 40px rgba(0,0,0,0.6);">
+          <div>
+            <div style="font-family:var(--font-head);font-size:1.9rem;font-weight:900;color:white;line-height:1;">12,491</div>
+            <div style="font-size:0.62rem;color:var(--orange);text-transform:uppercase;letter-spacing:0.12em;font-weight:800;margin-top:5px;">Active Routes</div>
           </div>
-          <div class="map-hub" style="top:20%; left:48%;">
-            <div class="hub-pulse"></div><div class="hub-dot"></div><span class="hub-label">London</span>
-          </div>
-          <div class="map-hub" style="top:60%; left:52%;">
-            <div class="hub-pulse"></div><div class="hub-dot"></div><span class="hub-label">Johannesburg</span>
-          </div>
-          <div class="map-hub" style="top:35%; left:75%;">
-            <div class="hub-pulse"></div><div class="hub-dot"></div><span class="hub-label">Singapore</span>
-          </div>
-          <div class="map-hub" style="top:40%; left:60%;">
-            <div class="hub-pulse"></div><div class="hub-dot"></div><span class="hub-label">Dubai</span>
-          </div>
-          <div class="map-hub" style="top:30%; left:85%;">
-            <div class="hub-pulse"></div><div class="hub-dot"></div><span class="hub-label">Tokyo</span>
+          <div style="width:1px;background:rgba(255,255,255,0.12);"></div>
+          <div>
+            <div style="font-family:var(--font-head);font-size:1.9rem;font-weight:900;color:white;line-height:1;">192</div>
+            <div style="font-size:0.62rem;color:#4ade80;text-transform:uppercase;letter-spacing:0.12em;font-weight:800;margin-top:5px;">Countries</div>
           </div>
         </div>
-
-        <svg viewBox="0 0 1000 450" style="width:100%; height:100%; position:absolute; top:0; left:0; pointer-events:none;">
-          <defs>
-            <linearGradient id="line-grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#FF6600" stop-opacity="0.8"/>
-              <stop offset="100%" stop-color="#2563EB" stop-opacity="0.1"/>
-            </linearGradient>
-            <filter id="glow">
-              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-              <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-          
-          <path id="route1" d="M 220 112 Q 350 70 480 90" fill="none" stroke="url(#line-grad1)" stroke-width="2" filter="url(#glow)"/>
-          <circle cx="0" cy="0" r="3" fill="#fff" filter="url(#glow)">
-            <animateMotion dur="4s" repeatCount="indefinite"><mpath href="#route1"/></animateMotion>
-          </circle>
-
-          <path id="route2" d="M 480 90 Q 550 130 600 180" fill="none" stroke="rgba(37,99,235,0.5)" stroke-width="1.5"/>
-          <circle cx="0" cy="0" r="2.5" fill="#FF6600">
-            <animateMotion dur="3s" repeatCount="indefinite"><mpath href="#route2"/></animateMotion>
-          </circle>
-
-          <path id="route3" d="M 600 180 Q 680 180 750 157" fill="none" stroke="rgba(255,102,0,0.4)" stroke-width="1.5"/>
-          <circle cx="0" cy="0" r="2.5" fill="#3b82f6">
-            <animateMotion dur="3.5s" repeatCount="indefinite"><mpath href="#route3"/></animateMotion>
-          </circle>
-
-          <path id="route4" d="M 480 90 Q 450 180 520 270" fill="none" stroke="rgba(37,99,235,0.4)" stroke-width="2"/>
-          <circle cx="0" cy="0" r="3" fill="#fff" filter="url(#glow)">
-            <animateMotion dur="5s" repeatCount="indefinite"><mpath href="#route4"/></animateMotion>
-          </circle>
-          
-          <path id="route5" d="M 750 157 Q 800 140 850 135" fill="none" stroke="url(#line-grad1)" stroke-width="1.5"/>
-          <circle cx="0" cy="0" r="2" fill="#FF6600">
-            <animateMotion dur="2.5s" repeatCount="indefinite"><mpath href="#route5"/></animateMotion>
-          </circle>
-
-          <path id="route6" d="M 750 157 Q 650 250 520 270" fill="none" stroke="rgba(37,99,235,0.3)" stroke-width="1.5"/>
-          <circle cx="0" cy="0" r="2.5" fill="#3b82f6">
-            <animateMotion dur="6s" repeatCount="indefinite"><mpath href="#route6"/></animateMotion>
-          </circle>
-        </svg>
-
-        <div style="position:absolute; bottom:30px; right:30px; background:rgba(255,255,255,0.05); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.1); padding:20px; border-radius:20px; display:flex; gap:20px; box-shadow:0 10px 30px rgba(0,0,0,0.3);">
-          <div>
-            <div style="font-family:var(--font-head); font-size:1.5rem; font-weight:800; color:white;">12,491</div>
-            <div style="font-size:0.7rem; color:var(--orange); text-transform:uppercase; letter-spacing:0.05em; font-weight:700;">Active Routes</div>
-          </div>
-          <div style="width:1px; background:rgba(255,255,255,0.1);"></div>
-          <div>
-            <div style="font-family:var(--font-head); font-size:1.5rem; font-weight:800; color:white;">192</div>
-            <div style="font-size:0.7rem; color:#4ade80; text-transform:uppercase; letter-spacing:0.05em; font-weight:700;">Countries</div>
-          </div>
-        </div>
-
       </div>
     </div>
   </section>
+  <script>
+  (function(){
+    var cv=document.getElementById('globe-canvas');
+    if(!cv)return;
+    var cx=cv.getContext('2d');
+    var HUBS=[
+      [40.71,-74.00,'NEW YORK'],
+      [51.51,-0.12,'LONDON'],
+      [-26.20,28.04,'JOHANNESBURG'],
+      [1.35,103.82,'SINGAPORE'],
+      [25.20,55.27,'DUBAI'],
+      [35.68,139.69,'TOKYO'],
+      [48.86,2.35,'PARIS'],
+      [19.43,-99.13,'MEXICO CITY']
+    ];
+    var ROUTES=[
+      [1,0,'#FF6600'],[1,2,'#FF8833'],[1,4,'#60a5fa'],
+      [3,4,'#FF6600'],[3,5,'#3b82f6'],[0,6,'#FF8833'],
+      [2,4,'#FF6600'],[5,3,'#60a5fa'],[7,0,'#3b82f6'],[6,4,'#FF6600']
+    ];
+    var LAND=bld();
+    var rot=0,W,H,R,CX,CY;
+    var pr=ROUTES.map(function(){return Math.random();});
+    var sp=ROUTES.map(function(){return 0.0008+Math.random()*0.0007;});
+    function rs(){
+      var dpr=window.devicePixelRatio||1;
+      var rc=cv.parentElement.getBoundingClientRect();
+      W=Math.min(rc.width,960);H=W*0.6;
+      cv.width=W*dpr;cv.height=H*dpr;
+      cv.style.width=W+'px';cv.style.height=H+'px';
+      cx.setTransform(dpr,0,0,dpr,0,0);
+      R=H*0.44;CX=W*0.5;CY=H*0.5;
+    }
+    rs();window.addEventListener('resize',rs);
+    function v3(la,lo,r){
+      var p=(90-la)*Math.PI/180,t=(lo+r)*Math.PI/180;
+      return{x:Math.sin(p)*Math.cos(t),y:Math.cos(p),z:Math.sin(p)*Math.sin(t)};
+    }
+    function pj(v){return{x:CX+v.x*R,y:CY-v.y*R,z:v.z};}
+    function atm(){
+      var g=cx.createRadialGradient(CX,CY,R*0.85,CX,CY,R*1.45);
+      g.addColorStop(0,'rgba(37,99,235,0.12)');
+      g.addColorStop(0.6,'rgba(37,99,235,0.04)');
+      g.addColorStop(1,'rgba(0,0,0,0)');
+      cx.save();cx.fillStyle=g;
+      cx.beginPath();cx.arc(CX,CY,R*1.45,0,Math.PI*2);cx.fill();
+      var d=cx.createRadialGradient(CX+R*0.3,CY-R*0.2,R*0.1,CX,CY,R);
+      d.addColorStop(0,'rgba(0,0,0,0)');
+      d.addColorStop(0.8,'rgba(0,5,25,0)');
+      d.addColorStop(1,'rgba(0,5,25,0.65)');
+      cx.fillStyle=d;cx.beginPath();cx.arc(CX,CY,R,0,Math.PI*2);cx.fill();
+      cx.restore();
+    }
+    function grid(){
+      cx.save();cx.lineWidth=0.6;
+      var la,lo,f,vv,pp;
+      for(lo=0;lo<360;lo+=20){
+        cx.strokeStyle='rgba(37,99,235,0.18)';cx.beginPath();f=true;
+        for(la=-88;la<=88;la+=4){
+          vv=v3(la,lo,rot);if(vv.z<0){f=true;continue;}
+          pp=pj(vv);cx.globalAlpha=vv.z*0.5;
+          if(f){cx.moveTo(pp.x,pp.y);f=false;}else cx.lineTo(pp.x,pp.y);
+        }cx.stroke();
+      }
+      for(la=-75;la<=75;la+=25){
+        cx.strokeStyle='rgba(37,99,235,0.14)';cx.beginPath();f=true;
+        for(lo=0;lo<=360;lo+=3){
+          vv=v3(la,lo,rot);if(vv.z<0){f=true;continue;}
+          pp=pj(vv);cx.globalAlpha=vv.z*0.45;
+          if(f){cx.moveTo(pp.x,pp.y);f=false;}else cx.lineTo(pp.x,pp.y);
+        }cx.stroke();
+      }
+      cx.globalAlpha=1;cx.restore();
+    }
+    function land(){
+      cx.save();
+      for(var i=0;i<LAND.length;i++){
+        var v=v3(LAND[i][1],LAND[i][0],rot);
+        if(v.z<0)continue;
+        var p=pj(v);
+        var a=Math.pow(Math.max(0,v.z),0.55)*0.88;
+        var s=1.15+v.z*0.9;
+        cx.globalAlpha=a;cx.fillStyle='rgba(255,102,0,0.7)';
+        cx.beginPath();cx.arc(p.x,p.y,s,0,Math.PI*2);cx.fill();
+      }
+      cx.globalAlpha=1;cx.restore();
+    }
+    function arc(h1,h2,t,col){
+      var v1=v3(h1[0],h1[1],rot),v2=v3(h2[0],h2[1],rot);
+      if(v1.z<0.04&&v2.z<0.04)return;
+      var p1=pj(v1),p2=pj(v2);
+      var mx=(p1.x+p2.x)/2,my=(p1.y+p2.y)/2;
+      var d=Math.hypot(p2.x-p1.x,p2.y-p1.y),lf=d*0.38;
+      var nx=-(p2.y-p1.y)/Math.max(d,1),ny=(p2.x-p1.x)/Math.max(d,1);
+      var ccx=mx+nx*lf,ccy=my+ny*lf*0.4;
+      var al=Math.min((v1.z+v2.z)/2,1)*0.82;
+      cx.save();
+      cx.globalAlpha=al;cx.strokeStyle=col;cx.lineWidth=1.6;
+      cx.shadowColor=col;cx.shadowBlur=8;
+      cx.setLineDash([5,5]);cx.beginPath();
+      cx.moveTo(p1.x,p1.y);cx.quadraticCurveTo(ccx,ccy,p2.x,p2.y);cx.stroke();
+      cx.setLineDash([]);
+      var k,tt,tx,ty;
+      var sx=(1-t)*(1-t)*p1.x+2*(1-t)*t*ccx+t*t*p2.x;
+      var sy=(1-t)*(1-t)*p1.y+2*(1-t)*t*ccy+t*t*p2.y;
+      for(k=0;k<5;k++){
+        tt=Math.max(0,t-k*0.035);
+        tx=(1-tt)*(1-tt)*p1.x+2*(1-tt)*tt*ccx+tt*tt*p2.x;
+        ty=(1-tt)*(1-tt)*p1.y+2*(1-tt)*tt*ccy+tt*tt*p2.y;
+        cx.globalAlpha=al*(0.32-k*0.055);cx.fillStyle='#fff';
+        cx.beginPath();cx.arc(tx,ty,2.8-k*0.35,0,Math.PI*2);cx.fill();
+      }
+      cx.globalAlpha=al;cx.fillStyle='#fff';cx.shadowColor='#fff';cx.shadowBlur=18;
+      cx.beginPath();cx.arc(sx,sy,3.8,0,Math.PI*2);cx.fill();
+      cx.restore();
+    }
+    function hub(h){
+      var v=v3(h[0],h[1],rot);if(v.z<0.05)return;
+      var p=pj(v),al=v.z;
+      var pu=((Date.now()/900)%1);
+      cx.save();
+      cx.globalAlpha=al*(1-pu)*0.35;cx.strokeStyle='#FF6600';cx.lineWidth=1;
+      cx.shadowColor='#FF6600';cx.shadowBlur=10;
+      cx.beginPath();cx.arc(p.x,p.y,6+pu*18,0,Math.PI*2);cx.stroke();
+      cx.globalAlpha=al;cx.fillStyle='#fff';cx.shadowColor='#fff';cx.shadowBlur=18;
+      cx.beginPath();cx.arc(p.x,p.y,4.8,0,Math.PI*2);cx.fill();
+      cx.fillStyle='#FF6600';cx.shadowBlur=0;
+      cx.beginPath();cx.arc(p.x,p.y,2.4,0,Math.PI*2);cx.fill();
+      cx.globalAlpha=al*0.95;cx.font='bold 8px Barlow,sans-serif';
+      cx.fillStyle='#fff';cx.textAlign='center';
+      cx.shadowBlur=5;cx.shadowColor='rgba(0,0,0,0.9)';
+      cx.fillText(h[2],p.x,p.y-14);
+      cx.restore();
+    }
+    function frm(){
+      cx.clearRect(0,0,W,H);rot+=0.09;
+      atm();grid();land();
+      for(var i=0;i<ROUTES.length;i++){
+        pr[i]=(pr[i]+sp[i])%1;
+        arc(HUBS[ROUTES[i][0]],HUBS[ROUTES[i][1]],pr[i],ROUTES[i][2]);
+      }
+      for(var j=0;j<HUBS.length;j++)hub(HUBS[j]);
+      requestAnimationFrame(frm);
+    }
+    requestAnimationFrame(frm);
+    function bld(){
+      var d=[];
+      function f(la0,lo0,la1,lo1,st){
+        if(!st)st=3.4;
+        for(var la=la0;la<=la1;la+=st)
+          for(var lo=lo0;lo<=lo1;lo+=st)
+            if(Math.random()>0.3)d.push([lo+(Math.random()-0.5)*2,la+(Math.random()-0.5)*2]);
+      }
+      function fs(la0,lo0,la1,lo1,dn){
+        for(var la=la0;la<=la1;la+=5)
+          for(var lo=lo0;lo<=lo1;lo+=5)
+            if(Math.random()<dn)d.push([lo,la]);
+      }
+      f(-35,14,10,37);f(10,14,38,52);f(5,-18,38,25);f(38,8,55,45);
+      f(36,-10,72,30);f(50,30,72,60);f(60,-4,72,30);
+      f(5,95,55,145);f(55,60,75,135);f(25,45,55,95);
+      f(-10,100,10,142);f(0,100,25,128);f(35,30,70,60);f(25,58,50,100);
+      f(25,-125,75,-60);f(15,-95,25,-78);f(5,-85,15,-75);f(7,-77,11,-60);
+      f(-55,-75,12,-35);f(-40,114,-12,154);f(31,130,46,146);
+      f(50,-6,61,2);fs(60,-55,84,-18,0.22);f(-26,43,-12,50);f(-8,95,8,141);
+      return d;
+    }
+  })();
+  </script>
 
   <!-- ════════════════════════════════════════
        SERVICES SECTION
@@ -2799,3 +2895,4 @@ window.smartsupp||(function(d) {
 <noscript>Powered by <a href="https://www.smartsupp.com" target="_blank">Smartsupp</a></noscript>
 </body>
 </html>
+
