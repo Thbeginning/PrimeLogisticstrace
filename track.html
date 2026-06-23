@@ -808,7 +808,7 @@
   function doDownloadWaybill() {
     if (!currentShipment) return;
     const s = currentShipment;
-    const content = `PrimeLogistics Trace — OFFICIAL WAYBILL\n${'='.repeat(46)}\nTracking Number: ${s.tracking_number}\nStatus:          ${s.status}\n\nSENDER:   ${s.sender_name || '—'}\nRECEIVER: ${s.receiver_name || '—'}\n\nORIGIN:      ${s.origin || '—'}\nDESTINATION: ${s.destination || '—'}\n\nWEIGHT:   ${s.weight ? s.weight + ' kg' : '—'}\nCONTENTS: ${s.description || '—'}\nEST. DELIVERY: ${s.estimated_delivery || '—'}\n\n${'='.repeat(46)}\nGenerated: ${new Date().toLocaleString()}\n\nThis is an official waybill from PrimeLogistics Trace.\ninfo@PrimeLogistics Tracelogisticssolution.com`;
+    const content = `PrimeLogistics Trace — OFFICIAL WAYBILL\n${'='.repeat(46)}\nTracking Number: ${s.tracking_number}\nStatus:          ${s.status}\n\nSENDER:   ${s.sender_name || '—'}\nRECEIVER: ${s.receiver_name || '—'}\n\nORIGIN:      ${s.origin || '—'}\nDESTINATION: ${s.destination || '—'}\n\nWEIGHT:   ${s.weight ? s.weight + ' kg' : '—'}\nCONTENTS: ${s.description || '—'}\nEST. DELIVERY: ${s.estimated_delivery || '—'}\n\n${'='.repeat(46)}\nGenerated: ${new Date().toLocaleString()}\n\nThis is an official waybill from PrimeLogistics Trace.\ncontact@primelogisticstrace.com`;
     const blob = new Blob([content], { type: 'text/plain' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');

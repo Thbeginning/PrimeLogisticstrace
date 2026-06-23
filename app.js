@@ -1334,7 +1334,7 @@ window.downloadWaybill = function() {
     Coordinates: ${shipment.lat?.toFixed(4)}, ${shipment.lng?.toFixed(4)}
     
     This is an official waybill from PrimeLogistics Trace.
-    PrimeLogistics Tracelogisticssolution.com | info@PrimeLogistics Tracelogisticssolution.com
+    primelogisticstrace.com | contact@primelogisticstrace.com
   `;
 
   const blob = new Blob([content], { type: 'text/plain' });
