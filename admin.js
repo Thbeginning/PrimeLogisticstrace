@@ -246,6 +246,7 @@ function mountDashboard() {
     document.getElementById(id)?.addEventListener('blur', autoCalcDistanceETA);
   });
   document.getElementById('cs-transport')?.addEventListener('change', autoCalcDistanceETA);
+  document.getElementById('cs-speed')?.addEventListener('blur', autoCalcDistanceETA);
 
   // -- Event delegation for shipment table buttons --
   // This is more reliable than inline onclick in file:// context
@@ -524,7 +525,7 @@ async function loadShipmentRoute() {
       }).eq('id', shipmentId);
     }
 
-    const transportType = shipment.transport_type || 'plane';
+    const transportType = (shipment.transport_type || 'plane').split('|')[0];
     const waypoints = generateSmartWaypoints(originLatLng, destLatLng, transportType);
 
     const stops = [
@@ -1478,7 +1479,7 @@ document.getElementById('create-shipment-form')?.addEventListener('submit', asyn
   const payload = {
     tracking_number:  document.getElementById('cs-tracking').value.trim().toUpperCase(),
     status:           document.getElementById('cs-status').value,
-    transport_type:   document.getElementById('cs-transport')?.value || 'plane',
+    transport_type:   (() => { const t = document.getElementById('cs-transport')?.value || 'plane'; const s = document.getElementById('cs-speed')?.value.trim(); return s ? t + '|' + s : t; })(),
     sender_name:      document.getElementById('cs-sender').value.trim() || null,
     sender_phone:     document.getElementById('cs-sender-phone')?.value.trim() || null,
     receiver_name:    document.getElementById('cs-receiver').value.trim() || null,
@@ -1618,7 +1619,9 @@ function openEditModal(id) {
   document.getElementById('edit-destination').value       = s.destination || '';
   document.getElementById('edit-weight').value            = s.weight || '';
   document.getElementById('edit-description').value       = s.description || '';
-  document.getElementById('edit-transport').value         = s.transport_type || 'plane';
+  const tpParts = (s.transport_type || 'plane').split('|');
+  document.getElementById('edit-transport').value         = tpParts[0];
+  document.getElementById('edit-speed').value             = tpParts[1] || '';
   document.getElementById('edit-shipped-date').value      = s.shipped_date || '';
   document.getElementById('edit-delivery').value          = s.estimated_delivery || '';
   document.getElementById('edit-distance').value          = s.distance_km || '';
@@ -1664,7 +1667,7 @@ async function saveEditShipment() {
     destination:          document.getElementById('edit-destination').value.trim(),
     weight:               parseFloat(document.getElementById('edit-weight').value) || null,
     description:          document.getElementById('edit-description').value.trim(),
-    transport_type:       document.getElementById('edit-transport').value,
+    transport_type:       (() => { const t = document.getElementById('edit-transport').value; const s = document.getElementById('edit-speed').value.trim(); return s ? t + '|' + s : t; })(),
     shipped_date:         document.getElementById('edit-shipped-date').value || null,
     estimated_delivery:   document.getElementById('edit-delivery').value || null,
     distance_km:          document.getElementById('edit-distance').value.trim() || null,
@@ -1779,8 +1782,9 @@ async function autoCalcDistanceETA() {
     const distKm = Math.round(haversineKmAdmin(oLat, oLng, dLat, dLng));
 
     // Realistic transport speeds (km/h)
-    const speeds = { plane: 900, ship: 35, bus: 80, train: 120 };
-    const speed  = speeds[transportType] || 900;
+    const speeds = { plane: 900, ship: 40, bus: 80, train: 120 };
+    const customSpeed = document.getElementById('cs-speed')?.value.trim();
+    const speed  = customSpeed ? parseInt(customSpeed, 10) : (speeds[transportType] || 900);
     const hours  = distKm / speed;
 
     let etaStr;

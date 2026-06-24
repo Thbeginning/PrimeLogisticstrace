@@ -380,7 +380,7 @@
                   <input id="cs-weight" type="number" step="any" placeholder="e.g. 125" class="admin-input w-full bg-white/5 border border-white/10 text-white placeholder-white/20 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 transition-all" />
                 </div>
               </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Transport Type</label>
                   <select id="cs-transport" class="admin-input w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 transition-all">
@@ -391,7 +391,11 @@
                   </select>
                 </div>
                 <div>
-                  <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Shipped Date <span class="text-orange-400/60 normal-case font-normal">(shown on tracking card)</span></label>
+                  <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Custom Speed (km/h)</label>
+                  <input id="cs-speed" type="number" placeholder="e.g. 900" class="admin-input w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 transition-all" />
+                </div>
+                <div>
+                  <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Shipped Date <span class="text-orange-400/60 normal-case font-normal">(for live tracking)</span></label>
                   <input id="cs-shipped-date" type="date" class="admin-input w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 transition-all" />
                 </div>
               </div>
@@ -847,7 +851,7 @@
         </div>
 
         <!-- Shipping Info -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Transport Type</label>
             <select id="edit-transport" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500">
@@ -856,6 +860,10 @@
               <option value="bus">🚌 Road Freight</option>
               <option value="train">🚂 Rail Freight</option>
             </select>
+          </div>
+          <div>
+            <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Custom Speed (km/h)</label>
+            <input id="edit-speed" type="number" placeholder="e.g. 900" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500" />
           </div>
           <div>
             <label class="block text-white/60 text-xs font-medium mb-2 uppercase tracking-wider">Service Type</label>

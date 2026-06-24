@@ -995,8 +995,11 @@
 
     const { data: stops } = await db.from('route_stops').select('*').eq('shipment_id', shipment.id).order('stop_index',{ascending:true});
 
+    const rawTransport = shipment.transport_type || 'plane';
+    const baseType = rawTransport.split('|')[0];
+
     if (stops && stops.length >= 2) {
-      renderWithStops(stops, shipment.current_stop_index || 0, shipment, shipment.transport_type || 'plane');
+      renderWithStops(stops, shipment.current_stop_index || 0, shipment, baseType);
       return;
     }
 
@@ -1014,12 +1017,12 @@
       renderWithStops(
         [{ stop_index:0, name:shipment.origin||'Origin', lat:originCoords.lat, lng:originCoords.lng },
          { stop_index:1, name:shipment.destination||'Destination', lat:destCoords.lat, lng:destCoords.lng }],
-        Math.min(shipment.current_stop_index||0, 1), shipment, shipment.transport_type||'plane'
+        Math.min(shipment.current_stop_index||0, 1), shipment, baseType
       );
     } else {
       const cur = shipment.lat && shipment.lng ? { lat:parseFloat(shipment.lat), lng:parseFloat(shipment.lng) } : null;
       if (cur) {
-        placeTransport(cur.lat, cur.lng, shipment.transport_type||'plane');
+        placeTransport(cur.lat, cur.lng, baseType);
         _map.panTo(cur); _map.setZoom(5);
       }
     }
@@ -1133,7 +1136,13 @@
     if (_animId) { cancelAnimationFrame(_animId); _animId = null; }
     if (!_transportMarker || waypoints.length < 2) return;
 
-    const realSpeedKmH = { plane: 900, ship: 40, bus: 80, train: 120 }[type] || 900;
+    const rawTransport = shipment && shipment.transport_type ? shipment.transport_type : type;
+    const customSpeed = rawTransport.split('|')[1];
+    
+    let realSpeedKmH = { plane: 900, ship: 40, bus: 80, train: 120 }[type] || 900;
+    if (customSpeed && !isNaN(parseInt(customSpeed))) {
+      realSpeedKmH = parseInt(customSpeed, 10);
+    }
     const speedKmPerMs = realSpeedKmH / 3600000;
 
     const segDistances = waypoints.slice(0,-1).map((_,i) => haversineKmTrack(waypoints[i], waypoints[i+1]));
